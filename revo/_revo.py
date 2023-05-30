@@ -86,55 +86,67 @@ def _revo_melt(obj):
 
 
 class Revo(MutableMapping):
-    def __init__(self, obj, overrides=None, *, mercy=True, merge_defs=False):
+
+    def __init__(self, obj, overrides=None, *,
+                 mercy=True, absorb=False, retain=True):
         self.val = obj
         if not isinstance(obj, (list, dict)):
             raise TypeError('Only list or dict object allowed')
-        if overrides:
-            self.resolve(overrides, mercy=mercy, merge_defs=merge_defs)
 
+        self.mercy  = mercy   # allow unresolved or illegal references
+        self.absorb = absorb  # merge definitions into the tree
+        self.retain = retain  # try to keep reference value type
 
-    def melt(self):
-        return _revo_melt(self.val)
-
-
-    def resolve(self, override_spec=None, *, mercy=True, merge_defs=False):
         # top-level overrides not found in original object are definitions
-        defs = []
+        self.defs = []
 
+        if overrides:
+            self.resolve(overrides)
+
+
+    def override(self, spec):
+        for key, val in _parse_overrides(spec).items():
+            # treat new top-level keys as definitions
+            if '/' not in key and key not in self.val:
+                self.val[key] = val
+                if not self.absorb:
+                    self.defs.append(key)
+            else:
+                self[key] = val
+
+
+    def resolve(self, override_spec=None):
         # apply overrides
         if override_spec:
-            for key, val in _parse_overrides(override_spec).items():
-                # treat new top-level keys as definitions
-                if '/' not in key and key not in self.val:
-                    self.val[key] = val
-                    if not merge_defs:
-                        defs.append(key)
-                else:
-                    self[key] = val
+            self.override(override_spec)
 
-        # resolve value references
-        flat = {key: str(val) for key, val in self.melt()}
+        # resolve value references bottom-up
+        flat = {key: val for key, val in self.melt()}
         while any('$(' in val for val in flat.values()):
             subs = list(flat.keys())
             changed = 0
             for sub in subs:
                 for key, val in flat.items():
-                    if f'$({sub})' in val:
+                    var = f'$({sub})'
+                    val = str(val)
+                    if var in val:
                         if key == sub:
                             raise ValueError(f'self-reference of {sub}')
                         changed += 1
-                        self[key] = val.replace(f'$({sub})', flat[sub])
+                        if self.retain and val == var:
+                            self[key] = flat[sub]
+                        else:
+                            self[key] = val.replace(var, str(flat[sub]))
             if not changed:
                 break
             flat = {key: str(val) for key, val in self.melt()}
 
         # remove definitions
-        for key in defs:
+        for key in self.defs:
             del self[key]
 
         # mercy on unresolved or illegal references?
-        if not mercy:
+        if not self.mercy:
             for key, val in self.melt():
                 if '$(' not in val:
                     continue
@@ -144,6 +156,10 @@ class Revo(MutableMapping):
                 else:
                     err = f'reference {mo.group(1)} unresolved (from {key})'
                 raise ValueError(err)
+
+
+    def melt(self):
+        return _revo_melt(self.val)
 
 
     def __getitem__(self, key): return _revo_get(self.val, key)

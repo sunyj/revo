@@ -31,14 +31,14 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(doc, {'a': {'b': ['great']}})
 
 
-    def test_overrides_simp(self):
+    def test_resolve(self):
         obj = Revo(json.loads("""
 {
   "name": "test",
   "path": "/path/of/$(name)/$(date)",
   "conf": {
     "param": "some-$(date)",
-    "aaa": "$(name",
+    "aaa": "$(date)",
     "bbb": "$(nil)"
   },
   "def": {
@@ -49,6 +49,7 @@ class TestBasic(unittest.TestCase):
 }
 """), ['date=20210702'])
         self.assertEqual(obj['name'], 'test')
+        self.assertEqual(obj['conf/aaa'], 20210702)
         self.assertTrue(isinstance(obj['conf'], dict))
         self.assertEqual(obj['path'], '/path/of/test/20210702')
         self.assertEqual(obj['yyy'], 'test')
