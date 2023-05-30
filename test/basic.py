@@ -52,7 +52,7 @@ class TestBasic(unittest.TestCase):
   "yyy": "$($(def/x1)$(def/x2))",
   "line": "$(array/1)"
 }
-"""), ['date=20210702'])
+"""), ['date=20210702'], mercy=True)
         self.assertEqual(obj['name'], 'test')
         self.assertEqual(obj['conf/aaa'], 20210702)
         self.assertTrue(isinstance(obj['conf'], dict))

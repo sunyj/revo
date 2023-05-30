@@ -88,7 +88,7 @@ def _revo_melt(obj):
 class Revo(MutableMapping):
 
     def __init__(self, obj, overrides=None, *,
-                 mercy=True, absorb=False, retain=True):
+                 mercy=False, absorb=False, retain=True):
         self.val = obj
         if not isinstance(obj, (list, dict)):
             raise TypeError('Only list or dict object allowed')
@@ -124,15 +124,17 @@ class Revo(MutableMapping):
 
         # resolve value references bottom-up
         flat = {key: val for key, val in self.melt()}
-        while any('$(' in val for val in flat.values()):
+        while any('$(' in str(val) for val in flat.values()):
             subs = list(flat.keys())
             changed = 0
             for sub in subs:
+                var = f'$({sub})'
                 for key, val in flat.items():
-                    var = f'$({sub})'
                     val = str(val)
                     if var in val:
                         if key == sub:
+                            if self.mercy:
+                                continue
                             raise ValueError(f'self-reference of {sub}')
                         changed += 1
                         if self.retain and val == var:
@@ -141,7 +143,7 @@ class Revo(MutableMapping):
                             self[key] = val.replace(var, str(flat[sub]))
             if not changed:
                 break
-            flat = {key: str(val) for key, val in self.melt()}
+            flat = {key: val for key, val in self.melt()}
 
         # remove definitions
         for key in self.defs:
@@ -150,7 +152,7 @@ class Revo(MutableMapping):
         # mercy on unresolved or illegal references?
         if not self.mercy:
             for key, val in self.melt():
-                if '$(' not in val:
+                if '$(' not in str(val):
                     continue
                 mo = re.search(r'(\$\(.+\))', val)
                 if not mo:
