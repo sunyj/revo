@@ -45,7 +45,12 @@ class TestBasic(unittest.TestCase):
     "x1": "na",
     "x2": "me"
   },
-  "yyy": "$($(def/x1)$(def/x2))"
+  "array": [
+    "hello",
+    "world"
+  ],
+  "yyy": "$($(def/x1)$(def/x2))",
+  "line": "$(array/1)"
 }
 """), ['date=20210702'])
         self.assertEqual(obj['name'], 'test')
@@ -53,6 +58,7 @@ class TestBasic(unittest.TestCase):
         self.assertTrue(isinstance(obj['conf'], dict))
         self.assertEqual(obj['path'], '/path/of/test/20210702')
         self.assertEqual(obj['yyy'], 'test')
+        self.assertEqual(obj['line'], 'world')
 
 
 ### test/basic.py ends here

@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "revo"
-version = "0.1.0"
+version = "0.2.0"
 authors = [
   { name="Sun Yijiang", email="sunyijiang@gmail.com" },
 ]
-description = "Referenced Values in Objects"
+description = "Referenced Values in Objects."
 readme = "README.md"
 requires-python = ">=3.4"
 classifiers = [

@@ -80,7 +80,7 @@ def _revo_melt(obj):
     elif isinstance(obj, list):
         for idx, val in enumerate(obj):
             for k, v in _revo_melt(val):
-                yield (f'{idx}/{k}', v) if k else (key, val)
+                yield (f'{idx}/{k}', v) if k else (str(idx), val)
     else:
         yield (None, obj)
 
@@ -113,6 +113,8 @@ class Revo(MutableMapping):
                     self.defs.append(key)
             else:
                 self[key] = val
+
+        return self
 
 
     def resolve(self, override_spec=None):
@@ -156,6 +158,8 @@ class Revo(MutableMapping):
                 else:
                     err = f'reference {mo.group(1)} unresolved (from {key})'
                 raise ValueError(err)
+
+        return self
 
 
     def melt(self):
