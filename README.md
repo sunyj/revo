@@ -2,6 +2,8 @@
 
 **Revo** is a non-intrusive variable substitution solution for config files.
 
+**Revo** is [listed on PyPI](https://pypi.org/project/revo/).
+
 **Revo** casts a Python built-in `dict` or `list` into a mutable tree, where the
 value of each tree node is either a string or a number, while any node can
 reference any other node in the tree with GNU make style `$(var)` variable
