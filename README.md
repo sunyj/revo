@@ -21,7 +21,7 @@ variable substitution to it.
 
 **Revo** treats a Python built-in object as a tree of data, like an XML
 doc. The top-level object must be `dict` or `list`. Values on tree nodes must
-be either `str` or built-in number (`int` or `float`).
+be either `str`, `bool`, or built-in number (`int` or `float`).
 
 In order to reference *any* node in an object tree, we need to design a path
 mechanism. Yes, the idea is like [XPath](https://en.wikipedia.org/wiki/XPath)
