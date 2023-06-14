@@ -154,7 +154,7 @@ class Revo(MutableMapping):
             for key, val in self.melt():
                 if '$(' not in str(val):
                     continue
-                mo = re.search(r'(\$\(.+\))', val)
+                mo = re.search(r'(\$\([^)]+\))', val)
                 if not mo:
                     err = f'illegal reference "{val}" (from {key})'
                 else:
