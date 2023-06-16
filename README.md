@@ -141,8 +141,8 @@ values are left in the object.
 
 ## Definition merging
 
-Overrides may contain variables that are not in the object under resolve, for
-example:
+Top-level overrides may contain variables that are not in the object under
+resolve, for example:
 
 ```python
 import revo
@@ -151,9 +151,31 @@ conf['name'] # 'hello 20220101'
 conf['date'] # what do you expect?
 ```
 
-Such overrides are called *definitions*.  Definitions may stay in the object
-after the resolution.  Keyword-only boolean argument `absorb` controls this,
-it defaults to `False`.
+Such top-level overrides are called *definitions*.  Definitions may stay in
+the object after the resolution.  Keyword-only boolean argument `absorb`
+controls this, it defaults to `False`.
+
+
+## Definition extending
+
+Overrides may also contain variables with new leaf-node values, for example:
+
+```python
+import revo
+obj = {'data': {'name': 'foo'}}
+conf = revo.Revo(obj, overrides=['data/func=bar'])
+
+# good, as 'func' is a leaf node
+obj['data']['func'] # 'bar'
+
+# not good if extend is turned off
+conf = revo.Revo(obj, overrides=['data/func=bar'], extend=False)
+
+# error, as new is NOT a leaf node
+conf = revo.Revo(obj, overrides=['new/func=bar'])
+```
+
+Keyword-only boolean argument `extend` controls this, it defaults to `True`.
 
 
 ## Type retaining

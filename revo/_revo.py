@@ -46,19 +46,19 @@ def _revo_get(obj, path, orig_path=None):
     return _revo_get(obj[key], path[1:], orig_path)
 
 
-def _revo_set(obj, path, val, orig_path=None):
+def _revo_set(obj, path, val, extend=True, orig_path=None):
     if not isinstance(path, list):
-        _revo_set(obj, _revo_path(path), val)
+        _revo_set(obj, _revo_path(path), val, extend)
         return
     if not orig_path:
         orig_path = path
     key = path[0]
     if len(path) == 1:
-        if isinstance(key, str) and key not in obj:
+        if not extend and isinstance(key, str) and key not in obj:
             raise KeyError(f'path "{"/".join(orig_path)}" not found')
         obj[key] = val
     else:
-        _revo_set(obj[key], path[1:], val, orig_path)
+        _revo_set(obj[key], path[1:], val, extend, orig_path)
 
 
 def _revo_del(obj, path):
@@ -88,14 +88,15 @@ def _revo_melt(obj):
 class Revo(MutableMapping):
 
     def __init__(self, obj, overrides=None, *,
-                 mercy=False, absorb=False, retain=True):
-        self.val = obj
+                 mercy=False, absorb=False, retain=True, extend=True):
+        self.val = obj.copy()
         if not isinstance(obj, (list, dict)):
             raise TypeError('Only list or dict object allowed')
 
         self.mercy  = mercy   # allow unresolved or illegal references
         self.absorb = absorb  # merge definitions into the tree
         self.retain = retain  # try to keep reference value type
+        self.extend = extend  # allow extending new leaf nodes
 
         # top-level overrides not found in original object are definitions
         self.defs = []
@@ -169,12 +170,11 @@ class Revo(MutableMapping):
 
 
     def __getitem__(self, key): return _revo_get(self.val, key)
-    def __setitem__(self, key, val): _revo_set(self.val, key, val)
+    def __setitem__(self, key, val): _revo_set(self.val, key, val, self.extend)
     def __delitem__(self, key): _revo_del(self.val, key)
     def __iter__(self): return iter(self.val)
     def __len__(self): return len(self.val)
     def __str__(self): return str(self.val)
     def __repr__(self): return repr(self.val)
-
 
 ### revo.py ends here
