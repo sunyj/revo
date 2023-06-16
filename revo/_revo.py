@@ -5,6 +5,7 @@ __all__ = ['Revo']
 
 import re
 import ast
+from copy import deepcopy
 try:
     from collections.abc import MutableMapping
 except:
@@ -89,7 +90,7 @@ class Revo(MutableMapping):
 
     def __init__(self, obj, overrides=None, *,
                  mercy=False, absorb=False, retain=True, extend=True):
-        self.val = obj.copy()
+        self.val = deepcopy(obj)
         if not isinstance(obj, (list, dict)):
             raise TypeError('Only list or dict object allowed')
 

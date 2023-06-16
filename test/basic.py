@@ -61,4 +61,11 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(obj['line'], 'world')
 
 
+    def test_immutable(self):
+        obj = {'data': {'name': 'foo'}}
+        conf = Revo(obj, overrides=['data/func=bar'])
+        self.assertEqual(len(obj['data']), 1)
+        self.assertEqual(len(conf.val['data']), 2)
+
+
 ### test/basic.py ends here
