@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "revo"
-version = "0.2.1"
+version = "0.2.2"
 authors = [
   { name="Sun Yijiang", email="sunyijiang@gmail.com" },
 ]
