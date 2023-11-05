@@ -68,4 +68,17 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(len(conf.val['data']), 2)
 
 
+    def test_resolve2(self):
+        obj = Revo(json.loads("""
+{
+  "date": "some day",
+  "pipe": {
+    "ds": "file",
+    "date": "$(date)"
+  }
+}
+"""))
+        self.assertEqual(obj['pipe']['date'], 'some day')
+
+
 ### test/basic.py ends here

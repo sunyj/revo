@@ -98,12 +98,8 @@ class Revo(MutableMapping):
         self.absorb = absorb  # merge definitions into the tree
         self.retain = retain  # try to keep reference value type
         self.extend = extend  # allow extending new leaf nodes
-
-        # top-level overrides not found in original object are definitions
         self.defs = []
-
-        if overrides:
-            self.resolve(overrides)
+        self.resolve(overrides)
 
 
     def override(self, spec):
