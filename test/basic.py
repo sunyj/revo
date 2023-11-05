@@ -68,7 +68,7 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(len(conf.val['data']), 2)
 
 
-    def test_resolve2(self):
+    def test_empty_overrides(self):
         obj = Revo(json.loads("""
 {
   "date": "some day",
@@ -80,5 +80,72 @@ class TestBasic(unittest.TestCase):
 """))
         self.assertEqual(obj['pipe']['date'], 'some day')
 
+
+    def test_mercy_self_ref(self):
+        data = {"date": "$(date)"}
+        obj = Revo(data, mercy=True)
+        self.assertEqual(data, obj)
+        with self.assertRaises(ValueError):
+            obj = Revo(data, mercy=False)
+
+
+    def test_mercy_illegal(self):
+        data = {"date": "2020", "pipe": {"date": "$(date"}}
+        obj = Revo(data, mercy=True)
+        self.assertEqual(data, obj)
+        with self.assertRaises(ValueError):
+            obj = Revo(data, mercy=False)
+
+
+    def test_mercy_undefined(self):
+        data = {"date": "2020", "pipe": {"date": "$(dates)"}}
+        obj = Revo(data, mercy=True)
+        self.assertEqual(data, obj)
+        with self.assertRaises(ValueError):
+            obj = Revo(data, mercy=False)
+
+
+    def test_absorb(self):
+        data = {
+            "date": "some day",
+            "pipe": {
+                "ds": "file",
+                "date": "$(date)"
+            }
+        }
+        obj = Revo(data, ['period=empty'], absorb=True)
+        self.assertEqual(obj['period'], 'empty')
+        obj = Revo(data, ['period=empty'], absorb=False)
+        self.assertTrue('period' not in obj)
+
+
+    def test_retain(self):
+        data = {
+            "date": 20200101,
+            "pipe": {
+                "ds": "file",
+                "date": "$(date)"
+            }
+        }
+        obj = Revo(data, retain=True)
+        self.assertEqual(obj['pipe']['date'], 20200101)
+        self.assertTrue(isinstance(obj['pipe']['date'], int))
+        obj = Revo(data, retain=False)
+        self.assertEqual(obj['pipe']['date'], '20200101')
+        self.assertTrue(isinstance(obj['pipe']['date'], str))
+
+
+    def test_extend(self):
+        data = {
+            "date": "some day",
+            "pipe": {
+                "ds": "file",
+                "date": "$(date)"
+            }
+        }
+        obj = Revo(data, ['pipe/dst=/dev/null'], extend=True)
+        self.assertEqual(obj['pipe']['dst'], '/dev/null')
+        with self.assertRaises(KeyError):
+            obj = Revo(data, ['pipe/dst=/dev/null'], extend=False)
 
 ### test/basic.py ends here
